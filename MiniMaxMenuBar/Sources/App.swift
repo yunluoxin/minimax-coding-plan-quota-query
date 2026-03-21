@@ -2,6 +2,9 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: StatusBarViewModel
+    @State private var showSettings = false
+    @State private var apiKey: String = ConfigService.apiKey ?? ""
+    @State private var groupId: String = ConfigService.groupId ?? ""
 
     var body: some View {
         ZStack {
@@ -11,20 +14,103 @@ struct ContentView: View {
                 endPoint: .bottomTrailing
             )
 
-            VStack(spacing: 12) {
-                if let errorMessage = viewModel.errorMessage {
-                    errorCard(message: errorMessage)
-                } else if let quota = viewModel.quota {
-                    quotaCard(quota: quota)
-                } else {
-                    loadingView
-                }
-
-                actionButtons
+            if !ConfigService.isConfigured || showSettings {
+                settingsForm
+            } else {
+                mainContent
             }
-            .padding(16)
         }
         .fixedSize()
+    }
+
+    private var mainContent: some View {
+        VStack(spacing: 12) {
+            if let errorMessage = viewModel.errorMessage {
+                errorCard(message: errorMessage)
+            } else if let quota = viewModel.quota {
+                quotaCard(quota: quota)
+            } else {
+                loadingView
+            }
+
+            actionButtons
+        }
+        .padding(16)
+    }
+
+    private var settingsForm: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Image(systemName: "gear")
+                    .font(.system(size: 20))
+                    .foregroundColor(.cyan)
+
+                Text("设置")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+
+                Spacer()
+            }
+
+            VStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("API Key")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+
+                    SecureField("输入 API Key", text: $apiKey)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(10)
+                        .background(Color(hex: "2d2d44"))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Group ID")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+
+                    TextField("输入 Group ID", text: $groupId)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(10)
+                        .background(Color(hex: "2d2d44"))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                }
+            }
+
+            Button(action: saveSettings) {
+                Text("保存")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.cyan)
+                    )
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if ConfigService.isConfigured && !apiKey.isEmpty {
+                Button(action: { showSettings = false }) {
+                    Text("取消")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .padding(16)
+        .frame(width: 320)
+    }
+
+    private func saveSettings() {
+        ConfigService.apiKey = apiKey
+        ConfigService.groupId = groupId
+        showSettings = false
+        viewModel.refresh()
     }
 
     @ViewBuilder
@@ -68,6 +154,17 @@ struct ContentView: View {
                     .foregroundColor(.white)
 
                 Spacer()
+
+                Button(action: {
+                    apiKey = ConfigService.apiKey ?? ""
+                    groupId = ConfigService.groupId ?? ""
+                    showSettings = true
+                }) {
+                    Image(systemName: "gear")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
 
             VStack(spacing: 8) {

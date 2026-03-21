@@ -54,7 +54,8 @@ class StatusBarViewModel: ObservableObject {
     func refresh() {
         guard ConfigService.isConfigured else {
             DispatchQueue.main.async {
-                self.errorMessage = "请设置 MINIMAX_API_KEY 环境变量"
+                self.errorMessage = "请先在设置中配置 API Key"
+                self.quota = nil
             }
             return
         }
