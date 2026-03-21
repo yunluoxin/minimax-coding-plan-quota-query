@@ -21,7 +21,7 @@ jobs:
         run: |
           cd MiniMaxMenuBar
           xcodegen generate
-          sed -i '' 's/objectVersion = 77/objectVersion = 56/g' MiniMaxMenuBar.xcodeproj/project.pbxproj
+          perl -i -pe 's/objectVersion = 77/objectVersion = 56/g' MiniMaxMenuBar.xcodeproj/project.pbxproj
 
       - name: Build
         run: |
