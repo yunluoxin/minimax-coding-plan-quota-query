@@ -35,7 +35,7 @@ jobs:
       - name: Get version
         id: version
         run: |
-          VERSION=$(grep "MARKETING_VERSION" MiniMaxMenuBar/project.yml | sed 's/.*: *"\([^"]*\)"/\1/')
+          VERSION=$(grep "MARKETING_VERSION" MiniMaxMenuBar/project.yml | head -1 | sed 's/.*: *"\([^"]*\)"/\1/')
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "APP_NAME=MiniMaxMenuBar" >> $GITHUB_OUTPUT
 
