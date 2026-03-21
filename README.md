@@ -63,9 +63,9 @@ xcodebuild -project MiniMaxMenuBar.xcodeproj -scheme MiniMaxMenuBar \
 
 ### 配置
 
-在 Xcode 中设置环境变量：
-- `MINIMAX_API_KEY`: MiniMax API Key
-- `MINIMAX_GROUP_ID`: Group ID (可选)
+首次使用时，在弹出的设置界面中输入：
+- `API Key`: MiniMax API Key
+- `Group ID`: Group ID (可选)
 
 ### minimax-cp-query (Go)
 
