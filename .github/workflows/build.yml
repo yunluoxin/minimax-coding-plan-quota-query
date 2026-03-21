@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-dmg:
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -21,9 +21,6 @@ jobs:
         run: |
           cd MiniMaxMenuBar
           xcodegen generate
-          grep "objectVersion" MiniMaxMenuBar.xcodeproj/project.pbxproj
-          perl -i'' -pe 's/objectVersion = 77/objectVersion = 56/g' MiniMaxMenuBar.xcodeproj/project.pbxproj
-          grep "objectVersion" MiniMaxMenuBar.xcodeproj/project.pbxproj
 
       - name: Build
         run: |
