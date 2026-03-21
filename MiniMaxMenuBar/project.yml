@@ -4,7 +4,7 @@ options:
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "15.0"
-  projectFormat: xcode14_0
+  projectFormat: Xcode14.0
 
 settings:
   base:
