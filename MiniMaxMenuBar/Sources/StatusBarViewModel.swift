@@ -96,7 +96,7 @@ class StatusBarViewModel: ObservableObject {
     }
 
     private func startAutoRefresh() {
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.refresh()
             }
