@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -101,6 +101,7 @@
 				};
 			};
 			buildConfigurationList = E98A593EC1B548FACFFDE1D4 /* Build configuration list for PBXProject "MiniMaxMenuBar" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -109,7 +110,6 @@
 			);
 			mainGroup = F19DCD4E8885EB842FB8F1AB;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 7FB2DFC994D3984CF1E11C2C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
