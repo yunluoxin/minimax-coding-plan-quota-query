@@ -14,7 +14,7 @@ xcodebuild -project MiniMaxMenuBar.xcodeproj -scheme MiniMaxMenuBar -configurati
   CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO \
   BUILD_DIR="$(pwd)/.build" 2>&1 | tail -5
 
-APP_PATH="$(pwd)/build/Release/${APP_NAME}.app"
+APP_PATH="$(pwd)/.build/Release/${APP_NAME}.app"
 
 if [ ! -d "$APP_PATH" ]; then
     echo "Error: App not found at $APP_PATH"
