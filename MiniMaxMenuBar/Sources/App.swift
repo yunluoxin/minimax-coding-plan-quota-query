@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var viewModel: StatusBarViewModel
     @State private var showSettings = false
+    @State private var showStats = false
     @State private var apiKey: String = ConfigService.apiKey ?? ""
     @State private var groupId: String = ConfigService.groupId ?? ""
 
@@ -16,6 +17,8 @@ struct ContentView: View {
 
             if !ConfigService.isConfigured || showSettings {
                 settingsForm
+            } else if showStats {
+                StatsView(viewModel: viewModel, showStats: $showStats)
             } else {
                 mainContent
             }
@@ -281,6 +284,27 @@ struct ContentView: View {
             }
             .buttonStyle(PlainButtonStyle())
 
+            Button(action: { showStats = true }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "chart.bar")
+                        .font(.system(size: 12))
+                    Text("统计")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.purple.opacity(0.2))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.purple.opacity(0.5), lineWidth: 1)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+
             Button(action: { NSApp.terminate(nil) }) {
                 HStack(spacing: 6) {
                     Image(systemName: "power")
@@ -310,6 +334,193 @@ struct ContentView: View {
         formatter.dateFormat = "MM-dd HH:mm:ss"
         formatter.timeZone = TimeZone(identifier: "Asia/Shanghai") ?? TimeZone(identifier: "UTC")
         return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(seconds)))
+    }
+}
+
+// MARK: - StatsView
+
+struct StatsView: View {
+    @ObservedObject var viewModel: StatusBarViewModel
+    @Binding var showStats: Bool
+
+    private let tracker = UsageTracker.shared
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Header
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.cyan)
+
+                Text("使用统计")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                Button(action: { showStats = false }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 12, weight: .medium))
+                        Text("返回")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .foregroundColor(.cyan)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
+            // Weekly summary
+            if let quota = viewModel.quota {
+                weeklySummaryCard(quota: quota)
+            }
+
+            // Divider with "近7日"
+            dividerWithLabel()
+
+            // 7 days chart
+            chartSection
+
+            // Bottom stats
+            bottomStatsSection
+
+            Spacer()
+        }
+        .padding(16)
+        .frame(minWidth: 320)
+    }
+
+    @ViewBuilder
+    private func weeklySummaryCard(quota: ModelRemain) -> some View {
+        let weeklyUsed = quota.currentWeeklyTotalCount - quota.currentWeeklyUsageCount
+        let percentage = progressPercentage(quota: quota) * 100
+
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("本周已用:")
+                    .font(.system(size: 13))
+                    .foregroundColor(.gray)
+                Spacer()
+                Text("\(weeklyUsed) / \(quota.currentWeeklyTotalCount)")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white)
+                Text(String(format: "%.1f%%", percentage))
+                    .font(.system(size: 12))
+                    .foregroundColor(.blue)
+            }
+
+            // Text-based progress bar with █ and ░
+            let barWidth = 18
+            let filledCount = Int(CGFloat(barWidth) * progressPercentage(quota: quota))
+            let emptyCount = barWidth - filledCount
+            let progressBar = String(repeating: "█", count: filledCount) + String(repeating: "░", count: emptyCount)
+
+            Text(progressBar)
+                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                .foregroundColor(.blue)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(hex: "2d2d44").opacity(0.8))
+        )
+    }
+
+    private func progressPercentage(quota: ModelRemain) -> CGFloat {
+        let total = quota.currentWeeklyTotalCount
+        let used = total - quota.currentWeeklyUsageCount
+        guard total > 0 else { return 0 }
+        return CGFloat(used) / CGFloat(total)
+    }
+
+    private func dividerWithLabel() -> some View {
+        HStack(spacing: 8) {
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 1)
+
+            Text("近7日")
+                .font(.system(size: 12))
+                .foregroundColor(.gray)
+
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 1)
+        }
+    }
+
+    private var chartSection: some View {
+        let weeklyTotal = viewModel.quota?.currentWeeklyTotalCount ?? 0
+        let allData = tracker.last7DaysUsage(weeklyTotal: weeklyTotal)
+        let data = Array(allData.reversed())  // newest first
+        let maxUsage = data.map { $0.usage }.max() ?? 1
+
+        return VStack(alignment: .leading, spacing: 6) {
+            ForEach(data.indices, id: \.self) { index in
+                let item = data[index]
+                chartRow(for: item.date, usage: item.usage, maxUsage: maxUsage)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+    }
+
+    private func chartRow(for date: Date, usage: Int, maxUsage: Int) -> some View {
+        HStack(spacing: 8) {
+            // Date label
+            Text(dayLabel(for: date))
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundColor(.gray)
+                .frame(width: 40, alignment: .leading)
+
+            // Text-based progress bar with █ and ░
+            Text(progressBarText(usage: usage, maxUsage: maxUsage, barWidth: 12))
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundColor(.blue)
+
+            Spacer()
+
+            // Estimated value with ~ prefix
+            Text("~\(usage)")
+                .font(.system(size: 12))
+                .foregroundColor(.white)
+                .frame(width: 50, alignment: .trailing)
+        }
+    }
+
+    private func progressBarText(usage: Int, maxUsage: Int, barWidth: Int) -> String {
+        let filledCount: Int
+        if maxUsage > 0 {
+            filledCount = Int(CGFloat(barWidth) * CGFloat(usage) / CGFloat(maxUsage))
+        } else {
+            filledCount = 0
+        }
+        let emptyCount = barWidth - filledCount
+        return String(repeating: "█", count: max(0, filledCount)) + String(repeating: "░", count: max(0, emptyCount))
+    }
+
+    private var bottomStatsSection: some View {
+        let data = tracker.last7DaysUsage()
+        let total = data.reduce(0) { $0 + $1.usage }
+        let avg = data.isEmpty ? 0 : total / data.count
+        let maxVal = data.map { $0.usage }.max() ?? 0
+
+        return HStack {
+            Text("日均: ~\(avg)")
+                .font(.system(size: 11))
+                .foregroundColor(.gray)
+            Spacer()
+            Text("最大: \(maxVal)")
+                .font(.system(size: 11))
+                .foregroundColor(.gray)
+        }
+    }
+
+    private func dayLabel(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM-dd"
+        return formatter.string(from: date)
     }
 }
 

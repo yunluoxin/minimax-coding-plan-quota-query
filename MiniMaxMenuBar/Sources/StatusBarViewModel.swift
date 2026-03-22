@@ -10,6 +10,7 @@ class StatusBarViewModel: ObservableObject {
     @Published var isLoading: Bool = false
 
     private let service = QuotaService()
+    private let tracker = UsageTracker.shared
     private var timer: Timer?
 
     var statusBarText: String {
@@ -72,6 +73,11 @@ class StatusBarViewModel: ObservableObject {
                     self.quota = result
                     self.errorMessage = nil
                     self.isLoading = false
+                    // 记录快照用于使用量统计
+                    self.tracker.recordSnapshot(
+                        weeklyTotal: result.currentWeeklyTotalCount,
+                        weeklyRemain: result.currentWeeklyUsageCount
+                    )
                 }
             } catch let error as QuotaService.QuotaError {
                 await MainActor.run {

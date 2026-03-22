@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		93A3A2EF355D9665626F4BA3 /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25725C81D9FC809C065FC557 /* QuotaModels.swift */; };
 		95A9F2F04CFAAEFACD95BE6A /* StatusBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D8D3B47F9962739D84356B /* StatusBarViewModel.swift */; };
 		ABD2B7A2DA99CFB63D980103 /* QuotaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CE8396CA109447F6129BA7 /* QuotaService.swift */; };
+		D36AD712568482D45BB1F292 /* UsageTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76CCD5B1EF85954C0E059D6A /* UsageTracker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		441541B12362C1038E3A0FDC /* MiniMaxMenuBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniMaxMenuBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7573B4A47A22356304C36858 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		75CE8396CA109447F6129BA7 /* QuotaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaService.swift; sourceTree = "<group>"; };
+		76CCD5B1EF85954C0E059D6A /* UsageTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageTracker.swift; sourceTree = "<group>"; };
 		AB9D282CC8B7C841C55F8F9B /* ConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		AD52AF169776B49E3248704B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B869D7A6BFB81031C6F0384C /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 				7573B4A47A22356304C36858 /* main.swift */,
 				75CE8396CA109447F6129BA7 /* QuotaService.swift */,
 				D5D8D3B47F9962739D84356B /* StatusBarViewModel.swift */,
+				76CCD5B1EF85954C0E059D6A /* UsageTracker.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -101,7 +104,6 @@
 				};
 			};
 			buildConfigurationList = E98A593EC1B548FACFFDE1D4 /* Build configuration list for PBXProject "MiniMaxMenuBar" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -110,6 +112,7 @@
 			);
 			mainGroup = F19DCD4E8885EB842FB8F1AB;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 7FB2DFC994D3984CF1E11C2C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -130,6 +133,7 @@
 				93A3A2EF355D9665626F4BA3 /* QuotaModels.swift in Sources */,
 				ABD2B7A2DA99CFB63D980103 /* QuotaService.swift in Sources */,
 				95A9F2F04CFAAEFACD95BE6A /* StatusBarViewModel.swift in Sources */,
+				D36AD712568482D45BB1F292 /* UsageTracker.swift in Sources */,
 				3B5CD95EE8A8149E6728E528 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
