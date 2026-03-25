@@ -56,14 +56,43 @@ struct ModelRemain: Codable, Identifiable {
     }
 }
 
-/// 每日配额快照，用于使用量统计
-struct DailySnapshot: Codable {
-    /// 日期字符串 "2026-03-22"
-    let date: String
-    /// 当天记录的周总配额（用于跨周重置检测）
-    let weeklyTotal: Int
-    /// 当天记录的周剩余配额（用于计算日使用量）
-    let weeklyRemain: Int
-    /// 记录时间
-    let timestamp: Date
+import SwiftData
+
+@Model
+final class IntervalSnapshot {
+    @Attribute(.unique) var id: String          // "\(date)_\(intervalIndex)_\(timestamp.timeIntervalSince1970)"
+    var date: String                            // "yyyy-MM-dd" 本地时间
+    var intervalIndex: Int                      // 0-4
+    var totalCount: Int                         // currentIntervalTotalCount
+    var usageCount: Int                        // 窗口已用量
+    var timestamp: Date                        // 本地记录时间
+    var startTime: Int64                       // API 原始 UTC
+    var endTime: Int64                         // API 原始 UTC
+
+    init(date: String, intervalIndex: Int, totalCount: Int, usageCount: Int, timestamp: Date, startTime: Int64, endTime: Int64) {
+        self.id = "\(date)_\(intervalIndex)_\(timestamp.timeIntervalSince1970)"
+        self.date = date
+        self.intervalIndex = intervalIndex
+        self.totalCount = totalCount
+        self.usageCount = usageCount
+        self.timestamp = timestamp
+        self.startTime = startTime
+        self.endTime = endTime
+    }
 }
+
+@Model
+final class DailySnapshot {
+    @Attribute(.unique) var date: String       // "yyyy-MM-dd"
+    var dailyTotal: Int                        // 当日总用量
+    var weeklyTotal: Int                       // 本周总用量
+    var timestamp: Date
+
+    init(date: String, dailyTotal: Int, weeklyTotal: Int, timestamp: Date) {
+        self.date = date
+        self.dailyTotal = dailyTotal
+        self.weeklyTotal = weeklyTotal
+        self.timestamp = timestamp
+    }
+}
+
