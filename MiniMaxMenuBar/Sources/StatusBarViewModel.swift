@@ -74,10 +74,7 @@ class StatusBarViewModel: ObservableObject {
                     self.errorMessage = nil
                     self.isLoading = false
                     // 记录快照用于使用量统计
-                    self.tracker.recordSnapshot(
-                        weeklyTotal: result.currentWeeklyTotalCount,
-                        weeklyRemain: result.currentWeeklyUsageCount
-                    )
+                    self.tracker.recordSnapshot(model: result)
                 }
             } catch let error as QuotaService.QuotaError {
                 await MainActor.run {
