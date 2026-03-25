@@ -427,8 +427,9 @@ struct StatsView: View {
 
     @ViewBuilder
     private func weeklySummaryCard(quota: ModelRemain) -> some View {
-        let weeklyUsed = quota.currentWeeklyTotalCount - quota.currentWeeklyUsageCount
-        let percentage = progressPercentage(quota: quota) * 100
+        let weeklyUsed = weeklyTotal
+        let weeklyTotalCount = quota.currentIntervalTotalCount * 5 * 7  // 估算周总量
+        let percentage = weeklyTotalCount > 0 ? CGFloat(weeklyUsed) / CGFloat(weeklyTotalCount) : 0
 
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -436,19 +437,16 @@ struct StatsView: View {
                     .font(.system(size: 13))
                     .foregroundColor(.gray)
                 Spacer()
-                Text("\(weeklyUsed) / \(quota.currentWeeklyTotalCount)")
+                Text("\(weeklyUsed)")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white)
-                Text(String(format: "%.1f%%", percentage))
-                    .font(.system(size: 12))
-                    .foregroundColor(.blue)
             }
 
             // Text-based progress bar with █ and ░
             let barWidth = 18
-            let filledCount = Int(CGFloat(barWidth) * progressPercentage(quota: quota))
+            let filledCount = Int(CGFloat(barWidth) * percentage)
             let emptyCount = barWidth - filledCount
-            let progressBar = String(repeating: "█", count: filledCount) + String(repeating: "░", count: emptyCount)
+            let progressBar = String(repeating: "█", count: max(0, filledCount)) + String(repeating: "░", count: max(0, emptyCount))
 
             Text(progressBar)
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
@@ -459,13 +457,6 @@ struct StatsView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(hex: "2d2d44").opacity(0.8))
         )
-    }
-
-    private func progressPercentage(quota: ModelRemain) -> CGFloat {
-        let total = quota.currentWeeklyTotalCount
-        let used = total - quota.currentWeeklyUsageCount
-        guard total > 0 else { return 0 }
-        return CGFloat(used) / CGFloat(total)
     }
 
     private func dividerWithLabel() -> some View {
