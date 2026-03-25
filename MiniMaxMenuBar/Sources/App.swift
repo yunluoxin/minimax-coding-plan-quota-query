@@ -343,7 +343,40 @@ struct StatsView: View {
     @ObservedObject var viewModel: StatusBarViewModel
     @Binding var showStats: Bool
 
-    private let tracker = UsageTracker.shared
+    @Query private var allSnapshots: [IntervalSnapshot]
+
+    private var last7DaysData: [(date: Date, usage: Int)] {
+        let calendar = Calendar.current
+        var result: [(Date, Int)] = []
+
+        for i in (0..<7).reversed() {
+            let date = calendar.date(byAdding: .day, value: -i, to: Date()) ?? Date()
+            let dateString = UsageTracker.dateString(from: date)
+            let daySnapshots = allSnapshots.filter { $0.date == dateString }
+
+            var maxByInterval: [Int: Int] = [:]
+            for snap in daySnapshots {
+                if let existing = maxByInterval[snap.intervalIndex] {
+                    if snap.usageCount > existing {
+                        maxByInterval[snap.intervalIndex] = snap.usageCount
+                    }
+                } else {
+                    maxByInterval[snap.intervalIndex] = snap.usageCount
+                }
+            }
+
+            var total = 0
+            for i in 0..<5 {
+                total += maxByInterval[i] ?? 0
+            }
+            result.append((date, total))
+        }
+        return result
+    }
+
+    private var weeklyTotal: Int {
+        last7DaysData.reduce(0) { $0 + $1.usage }
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -451,9 +484,7 @@ struct StatsView: View {
     }
 
     private var chartSection: some View {
-        let weeklyTotal = viewModel.quota?.currentWeeklyTotalCount ?? 0
-        let allData = tracker.last7DaysUsage(weeklyTotal: weeklyTotal)
-        let data = Array(allData.reversed())  // newest first
+        let data = Array(last7DaysData.reversed())  // newest first
         let maxUsage = data.map { $0.usage }.max() ?? 1
 
         return VStack(alignment: .leading, spacing: 6) {
@@ -501,8 +532,8 @@ struct StatsView: View {
     }
 
     private var bottomStatsSection: some View {
-        let data = tracker.last7DaysUsage()
-        let total = data.reduce(0) { $0 + $1.usage }
+        let data = last7DaysData
+        let total = weeklyTotal
         let avg = data.isEmpty ? 0 : total / data.count
         let maxVal = data.map { $0.usage }.max() ?? 0
 
