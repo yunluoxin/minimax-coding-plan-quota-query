@@ -59,6 +59,12 @@ class QuotaService {
             throw QuotaError.apiError(apiResponse.baseResp.statusCode, apiResponse.baseResp.statusMsg)
         }
 
+        // 优先选择第一个周配额大于0的模型，因为周配额为0的模型无法计算使用量统计
+        if let validModel = apiResponse.modelRemains.first(where: { $0.currentWeeklyTotalCount > 0 }) {
+            return validModel
+        }
+
+        // Fallback：使用第一个模型
         guard let firstModel = apiResponse.modelRemains.first else {
             throw QuotaError.parseFailed
         }

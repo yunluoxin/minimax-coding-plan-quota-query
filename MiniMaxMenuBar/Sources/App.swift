@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @ObservedObject var viewModel: StatusBarViewModel
@@ -351,7 +352,7 @@ struct StatsView: View {
 
         for i in (0..<7).reversed() {
             let date = calendar.date(byAdding: .day, value: -i, to: Date()) ?? Date()
-            let dateString = UsageTracker.dateString(from: date)
+            let dateString = UsageTracker.dateStringFromDate(date)
             let daySnapshots = allSnapshots.filter { $0.date == dateString }
 
             var maxByInterval: [Int: Int] = [:]

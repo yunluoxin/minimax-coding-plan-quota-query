@@ -36,7 +36,7 @@ class UsageTracker {
     
     /// 计算指定日期的日用量（异步）
     func dailyUsage(for date: Date) async -> Int {
-        let dateString = Self.dateString(from: date)
+        let dateString = Self.dateStringFromDate(date)
         
         return await MainActor.run {
             let context = AppDelegate.modelContainer.mainContext
@@ -94,13 +94,18 @@ class UsageTracker {
     
     // MARK: - Private Methods
     
-    /// 根据 UTC startTime 计算本地日期字符串
-    static func dateString(from startTime: Int64) -> String {
-        let date = Date(timeIntervalSince1970: TimeInterval(startTime) / 1000)
+    /// 根据 Date 计算本地日期字符串
+    static func dateStringFromDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone.current
         return formatter.string(from: date)
+    }
+
+    /// 根据 UTC startTime 计算本地日期字符串
+    static func dateString(from startTime: Int64) -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(startTime) / 1000)
+        return dateStringFromDate(date)
     }
     
     /// 根据 UTC startTime 计算窗口序号
@@ -120,10 +125,11 @@ class UsageTracker {
     }
     
     /// 清理旧数据（首次插入时调用）
+    @MainActor
     private func cleanupOldDataIfNeeded() {
         let calendar = Calendar.current
         let cutoffDate = calendar.date(byAdding: .day, value: -maxDays, to: Date()) ?? Date()
-        let cutoffString = Self.dateString(from: Int64(cutoffDate.timeIntervalSince1970 * 1000))
+        let cutoffString = Self.dateStringFromDate(cutoffDate)
         
         let context = AppDelegate.modelContainer.mainContext
         let descriptor = FetchDescriptor<IntervalSnapshot>(
