@@ -577,6 +577,12 @@ struct StatsView: View {
                     Text("重置数据")
                         .font(.system(size: 11))
                         .foregroundColor(.red)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.red, lineWidth: 1)
+                        )
                 }
                 .buttonStyle(PlainButtonStyle())
             }
