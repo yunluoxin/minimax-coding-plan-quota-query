@@ -538,15 +538,37 @@ struct StatsView: View {
         let avg = data.isEmpty ? 0 : total / data.count
         let maxVal = data.map { $0.usage }.max() ?? 0
 
-        return HStack {
-            Text("日均: ~\(avg)")
-                .font(.system(size: 11))
-                .foregroundColor(.gray)
-            Spacer()
-            Text("最大: \(maxVal)")
-                .font(.system(size: 11))
-                .foregroundColor(.gray)
+        return VStack(spacing: 8) {
+            HStack {
+                Text("日均: ~\(avg)")
+                    .font(.system(size: 11))
+                    .foregroundColor(.gray)
+                Spacer()
+                Text("最大: \(maxVal)")
+                    .font(.system(size: 11))
+                    .foregroundColor(.gray)
+            }
+
+            // Reset button
+            HStack {
+                Spacer()
+                Button(action: resetData) {
+                    Text("重置数据")
+                        .font(.system(size: 11))
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
+    }
+
+    @Environment(\.modelContext) private var modelContext
+
+    private func resetData() {
+        for snapshot in allSnapshots {
+            modelContext.delete(snapshot)
+        }
+        try? modelContext.save()
     }
 
     private func dayLabel(for date: Date) -> String {
