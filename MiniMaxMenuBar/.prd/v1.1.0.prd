@@ -17,13 +17,14 @@
 ## 2. 数据来源
 
 ### 2.1 每周使用量
-- **来源**: API 直接返回
-- **计算**: `本周已用 = currentWeeklyTotalCount - currentWeeklyUsageCount`
-- **数据准确性**: 100% 准确（来自 API）
+- **来源**: 本地记录（API 已移除相关字段）
+- **计算**: `本周已用 = sum(7天每日用量)`，每日用量 = `sum(5个窗口的窗口用量)`
+- **窗口用量**: `currentIntervalTotalCount - currentIntervalUsageCount`（总量 - 剩余量）
+- **数据准确性**: 近似值（依赖刷新频率，每5分钟刷新）
 
 ### 2.2 每日使用量
-- **来源**: 本地记录 + 差量计算
-- **原理**: 记录每天的剩余配额快照，每日使用量 = 昨天剩余 - 今天剩余
+- **来源**: 本地记录
+- **原理**: 每5分钟刷新 API，记录每个窗口的 `totalCount - usageCount`，当天5个窗口求和
 - **数据准确性**: 近似值（依赖记录频率）
 
 ---
@@ -90,8 +91,10 @@ func calculateDailyUsage(for targetDate: Date) -> Int {
 ### 4.2 每周使用量
 
 ```swift
-let weeklyUsed = currentWeeklyTotalCount - currentWeeklyUsageCount
-let weeklyRemain = currentWeeklyUsageCount
+// 每周使用量 = 7天每日用量之和
+// 每日用量 = 当天5个窗口的窗口用量之和
+// 窗口用量 = totalCount - usageCount（存储前计算好）
+let weeklyUsed = last7DaysData.reduce(0) { $0 + $1.usage }
 ```
 
 ---
@@ -109,7 +112,7 @@ let weeklyRemain = currentWeeklyUsageCount
 │ 📊 使用统计           [返回] │
 ├─────────────────────────────┤
 │                             │
-│ 本周已用: 450 / 10000       │
+│ 本周已用: 450              │
 │ ████████░░░░░░░░░░  4.5%   │
 │                             │
 │ ─────── 近7日 ───────       │
