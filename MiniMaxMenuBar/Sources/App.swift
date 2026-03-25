@@ -379,6 +379,37 @@ struct StatsView: View {
         last7DaysData.reduce(0) { $0 + $1.usage }
     }
 
+    private var monthlyTotal: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) else {
+            return 0
+        }
+
+        var total = 0
+        var currentDate = monthStart
+        while currentDate <= now {
+            let dateString = UsageTracker.dateStringFromDate(currentDate)
+            let daySnapshots = allSnapshots.filter { $0.date == dateString }
+
+            var maxByInterval: [Int: Int] = [:]
+            for snap in daySnapshots {
+                if let existing = maxByInterval[snap.intervalIndex] {
+                    maxByInterval[snap.intervalIndex] = max(existing, snap.usageCount)
+                } else {
+                    maxByInterval[snap.intervalIndex] = snap.usageCount
+                }
+            }
+
+            for i in 0..<5 {
+                total += maxByInterval[i] ?? 0
+            }
+
+            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate) ?? currentDate
+        }
+        return total
+    }
+
     var body: some View {
         VStack(spacing: 12) {
             // Header
@@ -428,8 +459,7 @@ struct StatsView: View {
     @ViewBuilder
     private func weeklySummaryCard(quota: ModelRemain) -> some View {
         let weeklyUsed = weeklyTotal
-        let weeklyTotalCount = quota.currentIntervalTotalCount * 5 * 7  // 估算周总量
-        let percentage = weeklyTotalCount > 0 ? CGFloat(weeklyUsed) / CGFloat(weeklyTotalCount) : 0
+        let monthlyUsed = monthlyTotal
 
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -442,15 +472,15 @@ struct StatsView: View {
                     .foregroundColor(.white)
             }
 
-            // Text-based progress bar with █ and ░
-            let barWidth = 18
-            let filledCount = Int(CGFloat(barWidth) * percentage)
-            let emptyCount = barWidth - filledCount
-            let progressBar = String(repeating: "█", count: max(0, filledCount)) + String(repeating: "░", count: max(0, emptyCount))
-
-            Text(progressBar)
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundColor(.blue)
+            HStack {
+                Text("本月已用:")
+                    .font(.system(size: 13))
+                    .foregroundColor(.gray)
+                Spacer()
+                Text("\(monthlyUsed)")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white)
+            }
         }
         .padding(12)
         .background(
