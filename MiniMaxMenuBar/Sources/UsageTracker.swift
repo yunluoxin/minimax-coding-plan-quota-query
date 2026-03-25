@@ -16,11 +16,12 @@ class UsageTracker {
         let intervalIndex = Self.intervalIndex(from: model.startTime)
         let timestamp = Date()
         
+        // usageCount 是剩余量，窗口用量 = totalCount - usageCount
         let snapshot = IntervalSnapshot(
             date: dateString,
             intervalIndex: intervalIndex,
             totalCount: model.currentIntervalTotalCount,
-            usageCount: model.currentIntervalUsageCount,
+            usageCount: model.currentIntervalTotalCount - model.currentIntervalUsageCount,
             timestamp: timestamp,
             startTime: model.startTime,
             endTime: model.endTime
