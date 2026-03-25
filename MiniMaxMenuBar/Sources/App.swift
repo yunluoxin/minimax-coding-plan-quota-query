@@ -586,6 +586,7 @@ struct StatsView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
+            .padding(.top, 4)
         }
     }
 
