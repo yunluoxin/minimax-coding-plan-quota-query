@@ -1,8 +1,19 @@
 import AppKit
 import SwiftUI
+import SwiftData
 import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    static var modelContainer: ModelContainer = {
+        let schema = Schema([IntervalSnapshot.self, DailySnapshot.self])
+        let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: false)
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }()
+
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private let viewModel = StatusBarViewModel.shared
@@ -30,7 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentSize = NSSize(width: 320, height: 320)
         popover.behavior = .transient
         popover.animates = true
-        popover.contentViewController = NSHostingController(rootView: ContentView(viewModel: viewModel))
+        let contentView = ContentView(viewModel: viewModel)
+            .modelContainer(AppDelegate.modelContainer)
+        popover.contentViewController = NSHostingController(rootView: contentView)
     }
 
     private func setupEventMonitor() {
